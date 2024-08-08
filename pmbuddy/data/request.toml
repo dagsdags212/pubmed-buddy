@@ -1,0 +1,6 @@
+timeout = 5.0
+
+[headers]
+Connection = "keep-alive"
+Accept = "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8"
+User-Agent = "Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0"
