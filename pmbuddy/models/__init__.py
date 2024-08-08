@@ -27,6 +27,7 @@ class Article(BaseModel):
     title: str
     authors: List[str]
     citation: Citation
+    abstract: str
 
     def json(self) -> Dict[str, Any]:
         """Flattens article metadata into JSON format."""
