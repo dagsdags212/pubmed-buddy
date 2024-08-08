@@ -1,4 +1,2 @@
-[pubmed]
-PMC11068841 = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11068841/"
-PMC11060501 = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11060501/"
-PMC11060479 = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11060479/"
+PMCID_ROOT = "https://www.ncbi.nlm.nih.gov/pmc/articles"
+PMID_ROOT = "https://pubmed.ncbi.nlm.nih.gov"
