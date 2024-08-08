@@ -41,8 +41,8 @@ class PubmedParser:
         return article
 
     def _parse_citation_fields(self, citation: str) -> List[str]:
-        regex = r"(\d{4})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[\d\s]+?;\s?(\d+)\((\d)\):\s?(\d+).(\d+)"
-        res = re.findall(regex, citation)
+        regex = r"(\d{4})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*;\s?(\d+)\((\d)\):\s?(\d+).(\d+)"
+        res = re.findall(regex, citation.strip())
         return res[0]
 
     def _parse_soup_overview(self, soup) -> Article:

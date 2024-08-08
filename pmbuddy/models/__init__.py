@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
+from pmbuddy.data import CONFIG
 
 
 class PublicationDate(BaseModel):
@@ -64,4 +65,5 @@ class PubmedArticle(Article):
             "start_page": self.citation.pages.start,
             "end_page": self.citation.pages.end,
             "doi": self.citation.doi,
+            "url": f"{CONFIG['urls']['PMID_ROOT']}/{self.pmid}/",
        }
