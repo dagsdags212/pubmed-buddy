@@ -4,7 +4,8 @@ import httpx
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from pmbuddy.data import CONFIG
-from pmbuddy.helpers.validation import validate_pmid, validate_pmcid
+from pmbuddy.util.validation import validate_pmid, validate_pmcid
+from pmbuddy.models import PubmedArticle
 
 
 def soup_from_url(url: str) -> BeautifulSoup:
@@ -53,6 +54,7 @@ def extract_text(
     return parent.find(tag).text.strip()
 
 def extract_node(parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None):
+    """Find the first child node of given parent, tag, and identifier."""
     if id:
         return parent.find(tag, id=id)
     elif class_:
@@ -60,8 +62,13 @@ def extract_node(parent: Tag, tag: str, class_: Optional[str] = None, id: Option
     return parent.find(tag)
 
 def extract_nodes(parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None):
+    """Find a list of children nodes from a given parent, tag, and identifier."""
     if id:
         return parent.find_all(tag, id=id)
     elif class_:
         return parent.find_all(tag, class_=class_)
     return parent.find_all(tag)
+
+def fetch_articles(parser, pmids: List[str]) -> List[PubmedArticle]:
+    """Fetch journal metadata from a list of PubMed identifiers."""
+    return [parser.fetch_article(pmid) for pmid in pmids]
