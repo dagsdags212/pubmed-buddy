@@ -1,11 +1,16 @@
 import argparse
-from typing import List
+from typing import List, Tuple
 import pandas as pd
-from rich import box
 from rich.console import Console
-from rich.table import Table
-from pmbuddy.parsers import ArticleParser
+from rich.layout import Layout
+from pmbuddy.models import PubmedArticle
+from pmbuddy.parsers import ArticleParser, Pubmed
+from pmbuddy.util import fetch_articles, serialize
+from pmbuddy.util.display import display_table, display_abstract, display_abstract_panel
 
+def to_dataframe(articles: List[PubmedArticle]) -> pd.DataFrame:
+    data = [a.json() for a in articles]
+    return pd.DataFrame(data)
 
 parser = argparse.ArgumentParser(
     prog="pubmed-buddy",
@@ -22,47 +27,36 @@ parser.add_argument(
     help="display article abstract"
 )
 
-def to_dataframe(parser: ArticleParser, pmids: List[str]) -> pd.DataFrame:
-    data = []
-    for pmid in pmids:
-        article = parser.fetch_article(pmid)
-        data.append(article.json())
-    return pd.DataFrame(data)
+parser.add_argument(
+    "--file", "-f",
+    help="provide filepath containing PMIDs separated by newlines"
+)
 
-def display_rich_table(df: pd.DataFrame) -> None:
-    # Tidy up fields and filter columns
-    df["pub_year"] = df["pub_year"].astype(str)
-    df["pub_month"] = df["pub_month"].astype(str)
-    df["pages"] = (df["end_page"] - df["start_page"]).astype(str)
-    df["authors"] = df["authors"].apply(lambda l: ", ".join(map(str, l)))
-    subset = ["pmid", "title", "authors", "journal", "pub_year", "pub_month"]
-    df_filtered = df[subset]
-    # Create Rich table
-    table = Table(title="PubMed Articles", box=box.SIMPLE_HEAVY, expand=True)
-    table.add_column(justify="center")
-    for col in df_filtered.columns:
-        table.add_column(col, justify="left")
-    for url, (idx, row) in zip(df["url"], df_filtered.iterrows()):
-        pmid, title, authors, journal, *remaining = list(row)
-        table.add_row(
-            str(idx+1),
-            f"[cyan][link={url}]{pmid}",
-            f"[b]{title}",
-            authors,
-            f"[i]{journal}",
-            *remaining)
-    console.print(table)
-
-ap = ArticleParser()
-console = Console()
 
 def main() -> None:
+    ap = ArticleParser()
+    console = Console()
     args = parser.parse_args()
-    if args.pmid:
+    articles = None
+
+    pmid_list = None
+    if args.file:
+        pmid_list = serialize(args.file)
+    elif args.pmid:
         if "," in args.pmid:
             pmid_list = args.pmid.split(",")
-            df = to_dataframe(ap, pmid_list)
-            display_rich_table(df)
         else:
-            article = ap.fetch_article(args.pmid)
-            print(article.json())
+            pmid_list = [args.pmid]
+    else:
+        raise ValueError
+
+    articles = fetch_articles(ap, pmid_list)
+
+    if args.abstract:
+        if len(articles) > 1:
+            display_abstract_panel(articles, console)
+        else:
+            display_abstract(articles, console)
+    else:
+        df = to_dataframe(articles)
+        display_table(df, console)

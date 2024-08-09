@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 import httpx
+import pandas as pd
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from pmbuddy.data import CONFIG
@@ -48,10 +49,21 @@ def extract_text(
     class_: Optional[str] = None,
     id: Optional[str] = None) -> str:
     if id:
-        return parent.find(tag, id=id).text.strip()
+        try:
+            text = parent.find(tag, id=id).text.strip()
+        except AttributeError:
+            text = "Text not available"
     elif class_:
-        return parent.find(tag, class_=class_).text.strip()
-    return parent.find(tag).text.strip()
+        try:
+            text = parent.find(tag, class_=class_).text.strip()
+        except AttributeError:
+            text = "Text not available"
+    else:
+        try:
+            text = parent.find(tag).text.strip()
+        except AttributeError:
+            text = "Text not available"
+    return text
 
 def extract_node(parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None):
     """Find the first child node of given parent, tag, and identifier."""
@@ -72,3 +84,24 @@ def extract_nodes(parent: Tag, tag: str, class_: Optional[str] = None, id: Optio
 def fetch_articles(parser, pmids: List[str]) -> List[PubmedArticle]:
     """Fetch journal metadata from a list of PubMed identifiers."""
     return [parser.fetch_article(pmid) for pmid in pmids]
+
+def serialize(filepath) -> str:
+    pmid_list = []
+    try:
+        with open(filepath, "r") as handle:
+            for pmid in handle.readlines():
+                pmid_list.append(pmid.strip())
+        return pmid_list
+    except FileNotFoundError as e:
+        raise e
+
+def format_name(name: str) -> str:
+    """Only include the last name, followed by the first letter of the first name.
+
+    Example:
+        >>> name = "Steve Jobs"
+        >>> print(format_name(name))
+        Jobs S
+    """
+    name_comps = name.split(" ")
+    return f"{name_comps[-1]} {name_comps[0][0]}"
