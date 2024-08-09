@@ -2,7 +2,7 @@ import re
 from typing import Tuple, List
 from bs4 import BeautifulSoup
 from pmbuddy.models import PageRange, PublicationDate, Citation, Article, PubmedArticle
-from pmbuddy.helpers import (
+from pmbuddy.util import (
     soup_from_url,
     soup_from_pmid,
     soup_from_pmcid,
@@ -20,6 +20,7 @@ class PubmedParser:
         return article
 
     def fetch_from_id(self, id: str) -> Article:
+        print("Fetching:", id)
         if id.startswith("PMC"):
             soup = soup_from_pmcid(id)
             article = self._parse_soup(soup)
@@ -40,10 +41,12 @@ class PubmedParser:
                                 pmid=pmid, abstract=abstract)
         return article
 
-    def _parse_citation_fields(self, citation: str) -> List[str]:
-        regex = r"(\d{4})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*;\s?(\d+)\((\d)\):\s?(\d+).(\d+)"
-        res = re.findall(regex, citation.strip())
-        return res[0]
+    def _parse_pubdate(self, citation: str) -> List[str]:
+        pubdate_regex = r"(\d{4})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).+"
+        year, month = re.findall(pubdate_regex, citation.strip())[0]
+        #regex = r"(\d{4})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*[:;]\s?(.+)\((\d+)\)\D?(\d+)-(\d+)"
+        #regex = r"(\d{4})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*;\s?(.+)\((\d)\):\s?(\d+).(\d+)"
+        return PublicationDate(year=year, month=month)
 
     def _parse_soup_overview(self, soup) -> Article:
         # Extract key nodes
@@ -53,22 +56,19 @@ class PubmedParser:
         author_list = extract_node(header_node, "div", class_="authors-list")
         # Retrieve text from key nodes
         title = extract_text(header_node, "h1")
-        pubtype = extract_text(header_node, "div", class_="publication-type")
         # Citation data
         journal = extract_text(header_node, "button")
-        citation_fields = extract_text(header_node, "span", class_="cit")
-        year, month, article_num, issue_num, start_page, end_page = self._parse_citation_fields(citation_fields)
         doi = extract_text(header_node, "span", class_="citation-doi")
         authors = [a.text for a in extract_nodes(author_list, "a", class_="full-name")]
-        pages = PageRange(start=start_page, end=end_page)
-        pub_date = PublicationDate(year=year, month=month)
+        citation_fields = extract_text(header_node, "span", class_="cit")
+        pub_date = self._parse_pubdate(citation_fields)
         citation = Citation(journal=journal, publication_date=pub_date,
-                            article_num=article_num, issue_num=issue_num,
-                            pages=pages, doi=doi)
+                            article_num=None, issue_num=None,
+                            pages=None, doi=doi)
         # Extract identifiers
         identifier_node = extract_node(header_node, "ul", id="full-view-identifiers")
-        pmcid = extract_text(identifier_node, "strong", class_="current-id")
-        pmid = extract_text(identifier_node, "a", class_="id-link")
+        pmid = extract_text(identifier_node, "strong", class_="current-id")
+        pmcid = extract_text(identifier_node, "a", class_="id-link")
         # Abstract content
         abstract = extract_text(abstract_node, "p")
         article = PubmedArticle(title=title, authors=authors,
@@ -90,12 +90,10 @@ class PubmedParser:
         doi = extract_text(p2_node, "a")
 
         # Parse citation elements using regex
-        year, month, article_num, issue_num, start_page, end_page = self._parse_citation_fields(citation_fields)
-        pages = PageRange(start=start_page, end=end_page)
-        pub_date = PublicationDate(year=year, month=month)
+        pub_date = self._parse_citation_fields(citation_fields)
         citation = Citation(journal=journal, publication_date=pub_date,
-                            article_num=article_num, issue_num=issue_num,
-                            pages=pages, doi=doi)
+                            article_num=None, issue_num=None,
+                            pages=None, doi=doi)
         return citation
 
     def _extract_ids(self, soup) -> Tuple[str, str]:
