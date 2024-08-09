@@ -3,12 +3,14 @@ from typing import Tuple, List
 from bs4 import BeautifulSoup
 from pmbuddy.models import PageRange, PublicationDate, Citation, Article, PubmedArticle
 from pmbuddy.util import (
-    soup_from_url,
-    soup_from_pmid,
-    soup_from_pmcid,
     extract_text,
     extract_node,
     extract_nodes,
+)
+from pmbuddy.util.requests import (
+    soup_from_url,
+    soup_from_pmid,
+    soup_from_pmcid,
 )
 
 class PubmedParser:

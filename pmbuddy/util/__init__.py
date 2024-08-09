@@ -1,36 +1,9 @@
 from pathlib import Path
 from typing import List, Optional
-import httpx
-import pandas as pd
-from bs4 import BeautifulSoup
 from bs4.element import Tag
-from pmbuddy.data import CONFIG
-from pmbuddy.util.validation import validate_pmid, validate_pmcid
+from pmbuddy.config import CONFIG
 from pmbuddy.models import PubmedArticle
 
-
-def soup_from_url(url: str) -> BeautifulSoup:
-    """Return a soup object from a URL string."""
-    global CONFIG
-    res = None
-    with httpx.Client() as client:
-        req_params = CONFIG.get("request")
-        if req_params:
-            res = client.get(url, headers=req_params.get("headers"), timeout=req_params.get("timeout", 5.0))
-        else:
-            res = client.get(url, timeout=5.0)
-        res.raise_for_status()
-    return BeautifulSoup(res.content, "html.parser")
-
-def soup_from_pmid(pmid: str) -> BeautifulSoup:
-    pmid = validate_pmid(pmid)
-    url = f"{CONFIG['urls']['PMID_ROOT']}/{pmid}/"
-    return soup_from_url(url)
-
-def soup_from_pmcid(pmcid: str) -> BeautifulSoup:
-    pmcid = validate_pmcid(pmcid)
-    url = f"{CONFIG['urls']['PMCID_ROOT']}/{pmcid}/"
-    return soup_from_url(url)
 
 def detect_article_source(url: str) -> Optional[str]:
     scheme, domain, *_ = Path(url).parts
@@ -81,11 +54,7 @@ def extract_nodes(parent: Tag, tag: str, class_: Optional[str] = None, id: Optio
         return parent.find_all(tag, class_=class_)
     return parent.find_all(tag)
 
-def fetch_articles(parser, pmids: List[str]) -> List[PubmedArticle]:
-    """Fetch journal metadata from a list of PubMed identifiers."""
-    return [parser.fetch_article(pmid) for pmid in pmids]
-
-def serialize(filepath) -> str:
+def serialize(filepath) -> List[str]:
     pmid_list = []
     try:
         with open(filepath, "r") as handle:

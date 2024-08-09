@@ -5,7 +5,8 @@ from rich.console import Console
 from rich.layout import Layout
 from pmbuddy.models import PubmedArticle
 from pmbuddy.parsers import ArticleParser, Pubmed
-from pmbuddy.util import fetch_articles, serialize
+from pmbuddy.util import serialize
+from pmbuddy.util.requests import fetch_articles
 from pmbuddy.util.display import display_table, display_abstract, display_abstract_panel
 
 def to_dataframe(articles: List[PubmedArticle]) -> pd.DataFrame:

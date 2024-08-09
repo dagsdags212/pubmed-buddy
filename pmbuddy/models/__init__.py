@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-from pmbuddy.data import CONFIG
+from pmbuddy.config import CONFIG
 
 
 class PublicationDate(BaseModel):
