@@ -19,16 +19,16 @@ class PageRange(BaseModel):
 class Citation(BaseModel):
     journal: str
     publication_date: PublicationDate
-    article_num: int
-    issue_num: int
-    pages: PageRange
     doi: str
+    issue_num: Optional[int] = None
+    article_num: Optional[str] = None
+    pages: Optional[PageRange] = None
 
 class Article(BaseModel):
     title: str
     authors: List[str]
     citation: Citation
-    abstract: str
+    abstract: Optional[str] = None
 
     def json(self) -> Dict[str, Any]:
         """Flattens article metadata into JSON format."""
@@ -40,8 +40,6 @@ class Article(BaseModel):
             "pub_year": self.citation.publication_date.year,
             "article_num": self.citation.article_num,
             "issue_num": self.citation.issue_num,
-            "start_page": self.citation.pages.start,
-            "end_page": self.citation.pages.end,
             "doi": self.citation.doi,
        }
 
@@ -49,6 +47,10 @@ class Article(BaseModel):
 class PubmedArticle(Article):
     pmcid: str
     pmid: str
+
+    @property
+    def url(self) -> str:
+        return f"{CONFIG['urls']['PMID_ROOT']}/{self.pmid}/"
 
     def json(self) -> Dict[str, Any]:
         """Flattens article metadata into JSON format."""
@@ -62,8 +64,6 @@ class PubmedArticle(Article):
             "pub_year": self.citation.publication_date.year,
             "article_num": self.citation.article_num,
             "issue_num": self.citation.issue_num,
-            "start_page": self.citation.pages.start,
-            "end_page": self.citation.pages.end,
             "doi": self.citation.doi,
             "url": f"{CONFIG['urls']['PMID_ROOT']}/{self.pmid}/",
        }
