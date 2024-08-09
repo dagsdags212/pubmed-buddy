@@ -1,3 +1,18 @@
+[tool.poetry]
+name = "pubmed-buddy"
+version = "0.1.0"
+description = "A tool for extracting journal metadata from PubMed"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+beautifulsoup4 = "^4.12.3"
+httpx = "^0.27.0"
+pydantic = "^2.8.2"
+pandas = "^2.2.2"
+
+
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
