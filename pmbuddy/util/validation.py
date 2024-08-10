@@ -13,6 +13,7 @@ def validate_pmid(pmid: str) -> str:
         return match.group(0)
     raise ValueError("Invalid PMID: format should follow XXXXXXXX")
 
+
 def validate_pmcid(pmcid: str) -> str:
     """Validates the format of a given PMCID.
 

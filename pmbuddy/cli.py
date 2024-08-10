@@ -9,28 +9,22 @@ from pmbuddy.util import serialize
 from pmbuddy.util.requests import fetch_articles
 from pmbuddy.util.display import display_table, display_abstract, display_abstract_panel
 
+
 def to_dataframe(articles: List[PubmedArticle]) -> pd.DataFrame:
     data = [a.json() for a in articles]
     return pd.DataFrame(data)
 
+
 parser = argparse.ArgumentParser(
-    prog="pubmed-buddy",
-    description="Streamline retrival of journal data from PubMed"
+    prog="pubmed-buddy", description="Streamline retrival of journal data from PubMed"
 )
 
-parser.add_argument(
-    "--pmid", "-i", action="store",
-    help="PubMed journal identifier"
-)
+parser.add_argument("--pmid", "-i", action="store", help="PubMed journal identifier")
+
+parser.add_argument("--abstract", action="store_true", help="display article abstract")
 
 parser.add_argument(
-    "--abstract", action="store_true",
-    help="display article abstract"
-)
-
-parser.add_argument(
-    "--file", "-f",
-    help="provide filepath containing PMIDs separated by newlines"
+    "--file", "-f", help="provide filepath containing PMIDs separated by newlines"
 )
 
 

@@ -10,6 +10,7 @@ from rich.text import Text
 from pmbuddy.models import PubmedArticle
 from pmbuddy.util import format_name
 
+
 def display_table(df: pd.DataFrame, console: Console) -> None:
     # Tidy up fields and filter columns
     df["pub_year"] = df["pub_year"].astype(str)
@@ -26,12 +27,13 @@ def display_table(df: pd.DataFrame, console: Console) -> None:
     for url, (idx, row) in zip(df["url"], df_filtered.iterrows()):
         pmid, title, authors, journal, *remaining = list(row)
         table.add_row(
-            str(idx+1),
+            str(idx + 1),
             f"[cyan][link={url}]{pmid}",
             f"[b]{title}",
             authors,
             f"[i]{journal}",
-            *remaining)
+            *remaining,
+        )
     console.print(table)
 
 
@@ -41,26 +43,37 @@ def display_abstract(articles: List[PubmedArticle], console: Console) -> None:
         authors = ", ".join(article.authors)
         title = Text(article.title, justify="full")
         title.stylize("bold cyan")
-        title_panel = Panel(Align(title, "center"), subtitle=authors, subtitle_align="center")
+        title_panel = Panel(
+            Align(title, "center"), subtitle=authors, subtitle_align="center"
+        )
         abstract.pad_left(10)
-        panel = Panel(abstract, box=box.SIMPLE_HEAVY,
-                      subtitle=article.url, subtitle_align="center",
-                      padding=[1, 15, 2, 15])
+        panel = Panel(
+            abstract,
+            box=box.SIMPLE_HEAVY,
+            subtitle=article.url,
+            subtitle_align="center",
+            padding=[1, 15, 2, 15],
+        )
         console.print(title_panel)
         console.print(panel)
+
 
 def display_abstract_panel(articles: List[PubmedArticle], console: Console) -> None:
     HEIGHT = 25
     layouts = []
     for idx, article in enumerate(articles, start=1):
-        abstract = Align.center(Text(article.abstract, justify="full"), vertical="middle")
+        abstract = Align.center(
+            Text(article.abstract, justify="full"), vertical="middle"
+        )
         authors = Text(f"{article.authors[0]} et al.", style="italic")
         title = Align.center(
             Text(article.title.upper(), justify="center", style="bold cyan"),
-            vertical="middle"
+            vertical="middle",
         )
         abstract_panel = Panel(abstract, box=box.SIMPLE_HEAVY, height=HEIGHT)
-        title_panel = Panel(title, height=HEIGHT, subtitle=authors, subtitle_align="center")
+        title_panel = Panel(
+            title, height=HEIGHT, subtitle=authors, subtitle_align="center"
+        )
         layout = Layout()
         left_name = f"title{idx}"
         right_name = f"abstract{idx}"

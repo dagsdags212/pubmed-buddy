@@ -8,6 +8,7 @@ class PublicationDate(BaseModel):
     month: int | str
     day: Optional[int] = None
 
+
 class PageRange(BaseModel):
     start: int
     end: int
@@ -16,6 +17,7 @@ class PageRange(BaseModel):
     def span(self) -> int:
         return self.end - self.start
 
+
 class Citation(BaseModel):
     journal: str
     publication_date: PublicationDate
@@ -23,6 +25,7 @@ class Citation(BaseModel):
     issue_num: Optional[int] = None
     article_num: Optional[str] = None
     pages: Optional[PageRange] = None
+
 
 class Article(BaseModel):
     title: str
@@ -41,7 +44,7 @@ class Article(BaseModel):
             "article_num": self.citation.article_num,
             "issue_num": self.citation.issue_num,
             "doi": self.citation.doi,
-       }
+        }
 
 
 class PubmedArticle(Article):
@@ -66,4 +69,4 @@ class PubmedArticle(Article):
             "issue_num": self.citation.issue_num,
             "doi": self.citation.doi,
             "url": f"{CONFIG['urls']['PMID_ROOT']}/{self.pmid}/",
-       }
+        }

@@ -12,9 +12,7 @@ setuptools.setup(
     author="dagsdags212",
     author_email="jegsamson.dev@gmail.com",
     license="The Unlicense",
-    project_urls={
-        "Source": "https://github.com/dagsdags212/pubmed-buddy"
-    },
+    project_urls={"Source": "https://github.com/dagsdags212/pubmed-buddy"},
     classifiers=[
         "Development Status :: 2 - Pre-alpha",
         "Programming Language :: Python :: 3.12",
@@ -23,5 +21,5 @@ setuptools.setup(
     install_requires=["httpx", "pydantic", "pandas", "bs4"],
     packages=setuptools.find_packages(),
     include_package_data=True,
-    entry_points={'console_scripts': ["pmb = pmbuddy.cli:main"]}
+    entry_points={"console_scripts": ["pmb = pmbuddy.cli:main"]},
 )

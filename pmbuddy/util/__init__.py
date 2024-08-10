@@ -16,11 +16,10 @@ def detect_article_source(url: str) -> Optional[str]:
             print("Cannot identify URL source")
             return
 
+
 def extract_text(
-    parent: Tag,
-    tag: str,
-    class_: Optional[str] = None,
-    id: Optional[str] = None) -> str:
+    parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None
+) -> str:
     if id:
         try:
             text = parent.find(tag, id=id).text.strip()
@@ -38,7 +37,10 @@ def extract_text(
             text = "Text not available"
     return text
 
-def extract_node(parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None):
+
+def extract_node(
+    parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None
+):
     """Find the first child node of given parent, tag, and identifier."""
     if id:
         return parent.find(tag, id=id)
@@ -46,13 +48,17 @@ def extract_node(parent: Tag, tag: str, class_: Optional[str] = None, id: Option
         return parent.find(tag, class_=class_)
     return parent.find(tag)
 
-def extract_nodes(parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None):
+
+def extract_nodes(
+    parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None
+):
     """Find a list of children nodes from a given parent, tag, and identifier."""
     if id:
         return parent.find_all(tag, id=id)
     elif class_:
         return parent.find_all(tag, class_=class_)
     return parent.find_all(tag)
+
 
 def serialize(filepath) -> List[str]:
     pmid_list = []
@@ -63,6 +69,7 @@ def serialize(filepath) -> List[str]:
         return pmid_list
     except FileNotFoundError as e:
         raise e
+
 
 def format_name(name: str) -> str:
     """Only include the last name, followed by the first letter of the first name.
