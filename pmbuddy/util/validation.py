@@ -1,6 +1,12 @@
 import re
 
 
+class FormatError(Exception):
+    """Custom exception for invalid PMID/PMCID formats."""
+
+    pass
+
+
 def validate_pmid(pmid: str) -> str:
     """Validates the format of a given PMID.
 
@@ -11,7 +17,7 @@ def validate_pmid(pmid: str) -> str:
     match = re.search(pmid_re, pmid)
     if match:
         return match.group(0)
-    raise ValueError("Invalid PMID: format should follow XXXXXXXX")
+    raise FormatError("Invalid PMID: format should follow XXXXXXXX")
 
 
 def validate_pmcid(pmcid: str) -> str:
@@ -24,4 +30,4 @@ def validate_pmcid(pmcid: str) -> str:
     match = re.search(pmcid_re, pmcid)
     if match:
         return match.group(0)
-    raise ValueError("Invalid PMCID: format should follow PMCXXXXXXX")
+    raise FormatError("Invalid PMCID: format should follow PMCXXXXXXX")
