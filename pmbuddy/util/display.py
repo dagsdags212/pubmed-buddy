@@ -11,37 +11,36 @@ from pmbuddy.models import PubmedArticle
 from pmbuddy.util import format_name
 
 
-def display_table(df: pd.DataFrame, console: Console) -> None:
+def display_table(df: pd.DataFrame, subset: List[str], console: Console) -> None:
     # Tidy up fields and filter columns
-    df["pub_year"] = df["pub_year"].astype(str)
-    df["pub_month"] = df["pub_month"].astype(str)
-    df["authors"] = df["authors"].apply(lambda names: map(format_name, names))
+    df["authors"] = df["authors"].apply(
+        lambda names: map(format_name, names.split(","))
+    )
     df["authors"] = df["authors"].apply(lambda l: ", ".join(map(str, l)))
-    subset = ["pmid", "title", "journal", "pub_year", "pub_month", "authors"]
-    df_filtered = df[subset]
     # Create Rich table
     table = Table(title="PubMed Articles", box=box.SIMPLE_HEAVY, expand=True)
     table.add_column(justify="center")
-    for col in df_filtered.columns:
+    df = df[subset]
+    for col in df.columns:
         table.add_column(col, justify="left")
-    for url, (idx, row) in zip(df["url"], df_filtered.iterrows()):
-        pmid, title, authors, journal, *remaining = list(row)
+    for idx, row in df.iterrows():
+        pmid, title, authors, journal, *remaining = row.values
         table.add_row(
             str(idx + 1),
-            f"[cyan][link={url}]{pmid}",
+            f"[cyan]{pmid}",
             f"[b]{title}",
             authors,
             f"[i]{journal}",
-            *remaining,
         )
     console.print(table)
 
 
-def display_abstract(articles: List[PubmedArticle], console: Console) -> None:
-    for article in articles:
-        abstract = Text(article.abstract, justify="full")
-        authors = ", ".join(article.authors)
-        title = Text(article.title, justify="full")
+def display_single_abstract(df: pd.DataFrame, console: Console) -> None:
+    df = df[["title", "authors", "abstract", "doi"]]
+    for idx, row in df.iterrows():
+        abstract = Text(row.abstract, justify="full")
+        authors = row.authors
+        title = Text(row.title, justify="full")
         title.stylize("bold cyan")
         title_panel = Panel(
             Align(title, "center"), subtitle=authors, subtitle_align="center"
@@ -50,7 +49,7 @@ def display_abstract(articles: List[PubmedArticle], console: Console) -> None:
         panel = Panel(
             abstract,
             box=box.SIMPLE_HEAVY,
-            subtitle=article.url,
+            subtitle=row.doi,
             subtitle_align="center",
             padding=[1, 15, 2, 15],
         )
@@ -58,16 +57,15 @@ def display_abstract(articles: List[PubmedArticle], console: Console) -> None:
         console.print(panel)
 
 
-def display_abstract_panel(articles: List[PubmedArticle], console: Console) -> None:
+def display_multiple_abstracts(df: pd.DataFrame, console: Console) -> None:
+    df = df[["title", "authors", "abstract"]]
     HEIGHT = 25
     layouts = []
-    for idx, article in enumerate(articles, start=1):
-        abstract = Align.center(
-            Text(article.abstract, justify="full"), vertical="middle"
-        )
-        authors = Text(f"{article.authors[0]} et al.", style="italic")
+    for idx, row in df.iterrows():
+        abstract = Align.center(Text(row.abstract, justify="full"), vertical="middle")
+        authors = Text(f"{row.authors.split(',')[0]} et al.", style="italic")
         title = Align.center(
-            Text(article.title.upper(), justify="center", style="bold cyan"),
+            Text(row.title.upper(), justify="center", style="bold cyan"),
             vertical="middle",
         )
         abstract_panel = Panel(abstract, box=box.SIMPLE_HEAVY, height=HEIGHT)

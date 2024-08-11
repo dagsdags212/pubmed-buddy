@@ -17,6 +17,10 @@ def detect_article_source(url: str) -> Optional[str]:
             return
 
 
+def generate_urls_from_ids(pmid_list: List[str | int]):
+    return [f"{CONFIG["urls"]["PMID_ROOT"]}/{id}" for id in pmid_list]
+
+
 def extract_text(
     parent: Tag, tag: str, class_: Optional[str] = None, id: Optional[str] = None
 ) -> str:
