@@ -1,4 +1,6 @@
 import argparse
+from pathlib import Path
+import subprocess
 from typing import List, Tuple
 import pandas as pd
 from rich.console import Console
@@ -7,7 +9,11 @@ from pmbuddy.models import PubmedArticle
 from pmbuddy.parsers import ArticleParser, Pubmed
 from pmbuddy.util import serialize
 from pmbuddy.util.requests import fetch_articles
-from pmbuddy.util.display import display_table, display_abstract, display_abstract_panel
+from pmbuddy.util.display import (
+    display_multiple_abstracts,
+    display_single_abstract,
+    display_table,
+)
 
 
 def to_dataframe(articles: List[PubmedArticle]) -> pd.DataFrame:
@@ -29,29 +35,30 @@ parser.add_argument(
 
 
 def main() -> None:
-    ap = ArticleParser()
-    console = Console()
     args = parser.parse_args()
-    articles = None
-
-    pmid_list = None
     if args.file:
         pmid_list = serialize(args.file)
+        n_articles = len(pmid_list)
+        pmid_str = ",".join(pmid_list)
     elif args.pmid:
-        if "," in args.pmid:
-            pmid_list = args.pmid.split(",")
-        else:
-            pmid_list = [args.pmid]
+        pmid_str = args.pmid
+        n_articles = len(pmid_str.split(","))
     else:
         raise ValueError
 
-    articles = fetch_articles(ap, pmid_list)
-
+    tmp_data = Path("/tmp/pubmed_data.csv")
+    spider = Path(__file__).parent / "spider.py"
+    subprocess.call(f"python {str(spider)} {pmid_str}", shell=True)
+    # Load scraped data into a dataframe.
+    df = pd.read_csv(tmp_data)
+    df[["pub_year", "pub_month"]] = df["pubdate"].str.split(",", n=1, expand=True)
+    subset = ["pmid", "title", "authors", "journal"]
+    console = Console()
     if args.abstract:
-        if len(articles) > 1:
-            display_abstract_panel(articles, console)
+        if n_articles > 1:
+            display_multiple_abstracts(df, console)
         else:
-            display_abstract(articles, console)
+            display_single_abstract(df, console)
     else:
-        df = to_dataframe(articles)
-        display_table(df, console)
+        display_table(df, subset, console)
+    exit(0)
