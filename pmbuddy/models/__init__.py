@@ -28,10 +28,10 @@ class Citation(BaseModel):
 
 
 class Article(BaseModel):
-    title: str
-    authors: List[str]
-    citation: Citation
-    abstract: Optional[str] = None
+    title: Optional[str] = Field(default=None)
+    authors: Optional[List[str]] = Field(default=None)
+    citation: Optional[Citation | str] = Field(default=None)
+    abstract: Optional[str] = Field(default=None)
 
     def json(self) -> Dict[str, Any]:
         """Flattens article metadata into JSON format."""
