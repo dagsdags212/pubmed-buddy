@@ -30,7 +30,7 @@ def display_table(df: pd.DataFrame, subset: List[str], console: Console) -> None
         pmid, title, authors, journal, *remaining = row.values
         table.add_row(
             str(idx + 1),
-            f"[cyan link={CONFIG['urls']['PMCID_ROOT']}/{pmid}]{pmid}",
+            f"[cyan link={CONFIG['urls']['PMID_ROOT']}/{pmid}]{pmid}",
             f"[b]{title}",
             authors,
             f"[i]{journal}",
