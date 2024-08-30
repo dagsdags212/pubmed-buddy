@@ -1,6 +1,8 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, TextIO
+
 from bs4.element import Tag
+
 from pmbuddy.config import CONFIG
 from pmbuddy.models import PubmedArticle
 
@@ -64,7 +66,13 @@ def extract_nodes(
     return parent.find_all(tag)
 
 
-def serialize(filepath) -> List[str]:
+def concat_from_stdin(stdin: TextIO) -> List[str]:
+    """Reads a sequence of PMIDs from TextIOWrapper."""
+    return [line.strip() for line in stdin]
+
+
+def concat_from_file(filepath) -> List[str]:
+    """Reads a sequence of PMIDs from a newline-delimited text file."""
     pmid_list = []
     try:
         with open(filepath, "r") as handle:

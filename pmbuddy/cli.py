@@ -1,14 +1,14 @@
 import argparse
-from pathlib import Path
 import subprocess
-from typing import List, Tuple
+import sys
+from pathlib import Path
+from typing import List
+
 import pandas as pd
 from rich.console import Console
-from rich.layout import Layout
+
 from pmbuddy.models import PubmedArticle
-from pmbuddy.parsers import ArticleParser, Pubmed
-from pmbuddy.util import serialize
-from pmbuddy.util.requests import fetch_articles
+from pmbuddy.util import concat_from_file, concat_from_stdin
 from pmbuddy.util.display import (
     display_multiple_abstracts,
     display_single_abstract,
@@ -36,8 +36,14 @@ parser.add_argument(
 
 def main() -> None:
     args = parser.parse_args()
-    if args.file:
-        pmid_list = serialize(args.file)
+
+    # First check if PMIDs are piped from standard input.
+    if not sys.stdin.isatty():
+        pmid_list = concat_from_stdin(sys.stdin)
+        n_articles = len(pmid_list)
+        pmid_str = ",".join(pmid_list)
+    elif args.file:
+        pmid_list = concat_from_file(args.file)
         n_articles = len(pmid_list)
         pmid_str = ",".join(pmid_list)
     elif args.pmid:
