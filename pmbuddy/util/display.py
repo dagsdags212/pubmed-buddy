@@ -1,4 +1,5 @@
 from typing import List
+
 import pandas as pd
 from rich import box
 from rich.align import Align
@@ -7,6 +8,8 @@ from rich.layout import Layout
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
+from pmbuddy.config import CONFIG
 from pmbuddy.models import PubmedArticle
 from pmbuddy.util import format_name
 
@@ -27,7 +30,7 @@ def display_table(df: pd.DataFrame, subset: List[str], console: Console) -> None
         pmid, title, authors, journal, *remaining = row.values
         table.add_row(
             str(idx + 1),
-            f"[cyan]{pmid}",
+            f"[cyan link={CONFIG['urls']['PMCID_ROOT']}/{pmid}]{pmid}",
             f"[b]{title}",
             authors,
             f"[i]{journal}",
